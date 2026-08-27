@@ -1,0 +1,417 @@
+/* ==========================================================================
+   DESIGN TOKENS
+   Theme: "Ink & Paper" — a writing desk, not a dashboard.
+   Serif for reading, monospace for raw text, sans for interface chrome.
+   ========================================================================== */
+:root {
+  /* Color */
+  --ink-900: #1c2331;   /* sidebar background, deep ink */
+  --ink-700: #2f3a4f;   /* sidebar borders / hover */
+  --ink-500: #5b6b85;   /* muted sidebar text */
+  --paper-50: #faf7f0;  /* preview pane background, warm paper */
+  --paper-100: #f1ece0; /* editor pane background, slightly deeper paper */
+  --paper-200: #e6ded0; /* borders on paper */
+  --accent: #3f7d8c;    /* teal ink-stamp accent */
+  --accent-dark: #2e5f6b;
+  --brick: #b5555c;     /* muted brick red, used sparingly for destructive actions */
+  --text-900: #23262b;
+  --text-600: #5a5f68;
+  --white: #ffffff;
+
+  /* Type */
+  --font-serif: "Source Serif 4", Georgia, serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Layout */
+  --sidebar-width: 260px;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--text-900);
+  background: var(--paper-50);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* Visible keyboard focus everywhere — accessibility floor */
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* ==========================================================================
+   APP SHELL
+   ========================================================================== */
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-width) 1fr;
+  height: 100vh;
+}
+
+/* ==========================================================================
+   SIDEBAR
+   ========================================================================== */
+.sidebar {
+  background: var(--ink-900);
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  padding: 20px 14px;
+  overflow-y: auto;
+}
+
+.sidebar__header {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.sidebar__brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.sidebar__mark {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  color: var(--accent);
+}
+
+.sidebar__name {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.btn {
+  border: none;
+  border-radius: var(--radius);
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 9px 12px;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.btn--new {
+  background: var(--accent);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+}
+.btn--new:hover { background: var(--accent-dark); }
+.btn--new:active { transform: scale(0.98); }
+
+.note-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.note-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px 10px 16px;
+  border-radius: var(--radius);
+  color: var(--ink-500);
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease;
+}
+
+.note-item:hover {
+  background: var(--ink-700);
+  color: var(--white);
+}
+
+.note-item.is-active {
+  background: var(--ink-700);
+  border-left-color: var(--accent);
+  color: var(--white);
+}
+
+.note-item__title {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.note-item__meta {
+  font-size: 11.5px;
+  color: var(--ink-500);
+}
+
+.sidebar__empty {
+  color: var(--ink-500);
+  font-size: 13px;
+  padding: 8px 4px;
+  line-height: 1.5;
+}
+
+/* Mobile menu toggle — hidden on desktop */
+.btn--menu {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 20;
+  background: var(--ink-900);
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.btn--menu span {
+  width: 18px;
+  height: 2px;
+  background: var(--white);
+  display: block;
+}
+
+/* ==========================================================================
+   WORKSPACE (toolbar + split panes + status bar)
+   ========================================================================== */
+.workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-width: 0;
+}
+
+.workspace__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--paper-200);
+  background: var(--paper-50);
+}
+
+.title-input {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-900);
+  border: none;
+  background: transparent;
+  flex: 1;
+  min-width: 0;
+  padding: 4px 2px;
+  border-radius: 4px;
+}
+.title-input::placeholder { color: #a9a196; }
+
+.workspace__actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+}
+
+.save-indicator {
+  font-size: 12.5px;
+  color: var(--text-600);
+  font-variant-numeric: tabular-nums;
+}
+.save-indicator.is-saving { color: var(--accent); }
+
+.btn--danger {
+  background: transparent;
+  color: var(--brick);
+  border: 1px solid rgba(181, 85, 92, 0.35);
+}
+.btn--danger:hover {
+  background: var(--brick);
+  color: var(--white);
+}
+
+/* ---- Split panes ---- */
+.panes {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 24px 1fr;
+  min-height: 0;
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.pane__label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-600);
+  padding: 10px 24px;
+  flex-shrink: 0;
+}
+
+.pane--editor { background: var(--paper-100); }
+.pane--preview { background: var(--paper-50); }
+
+.editor {
+  flex: 1;
+  border: none;
+  resize: none;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: var(--text-900);
+  padding: 0 24px 24px;
+}
+.editor::placeholder { color: #a19a8c; }
+
+.preview {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 28px 28px;
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-900);
+}
+
+/* Signature detail: a stitched "spine" between the two panes, evoking a
+   notebook binding — the one deliberately decorative element in the app. */
+.spine {
+  background: var(--paper-200);
+  display: flex;
+  justify-content: center;
+}
+.spine__stitch {
+  width: 1px;
+  height: 100%;
+  background-image: linear-gradient(var(--ink-500) 60%, transparent 0%);
+  background-size: 1px 12px;
+  background-repeat: repeat-y;
+  opacity: 0.45;
+}
+
+/* ---- Rendered markdown content typography ---- */
+.preview h1, .preview h2, .preview h3 {
+  font-family: var(--font-serif);
+  line-height: 1.3;
+  margin: 1.2em 0 0.4em;
+}
+.preview h1 { font-size: 1.9em; border-bottom: 1px solid var(--paper-200); padding-bottom: 0.2em; }
+.preview h2 { font-size: 1.4em; }
+.preview h3 { font-size: 1.15em; }
+.preview p { margin: 0.7em 0; }
+.preview a { color: var(--accent-dark); }
+.preview code {
+  font-family: var(--font-mono);
+  background: var(--paper-200);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+  font-size: 0.88em;
+}
+.preview pre {
+  background: var(--ink-900);
+  color: var(--paper-50);
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  overflow-x: auto;
+}
+.preview pre code { background: none; padding: 0; color: inherit; }
+.preview blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 0.8em 0;
+  padding: 0.1em 1em;
+  color: var(--text-600);
+}
+.preview ul, .preview ol { padding-left: 1.4em; }
+.preview img { max-width: 100%; border-radius: 4px; }
+.preview table { border-collapse: collapse; width: 100%; margin: 1em 0; }
+.preview th, .preview td { border: 1px solid var(--paper-200); padding: 6px 10px; text-align: left; }
+
+.preview:empty::before {
+  content: "Nothing to preview yet — type some Markdown on the left.";
+  color: var(--text-600);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* ---- Status bar ---- */
+.statusbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 24px;
+  border-top: 1px solid var(--paper-200);
+  font-size: 12px;
+  color: var(--text-600);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.statusbar__divider { opacity: 0.5; }
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    position: fixed;
+    inset: 0 30% 0 0;
+    z-index: 15;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.25);
+  }
+  .sidebar.is-open { transform: translateX(0); }
+  .btn--menu { display: flex; }
+  .workspace__toolbar { padding-left: 62px; }
+  .panes { grid-template-columns: 1fr; grid-template-rows: 1fr 16px 1fr; }
+  .spine__stitch {
+    width: 100%;
+    height: 1px;
+    background-image: linear-gradient(90deg, var(--ink-500) 60%, transparent 0%);
+    background-size: 12px 1px;
+  }
+}
